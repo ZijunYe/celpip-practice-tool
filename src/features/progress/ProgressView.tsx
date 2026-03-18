@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { ActivityCalendar, CalendarNav } from "./components/ActivityCalendar";
+import { ActivityCalendar } from "./components/ActivityCalendar";
 import { SessionList } from "./components/SessionList";
 import { getSessionsForDate, getActivityForMonth } from "./actions";
 import type { SpeakingSession } from "@/types/database";
@@ -62,19 +62,15 @@ export function ProgressView({
   }, [year, month]);
 
   return (
-    <div>
-      <CalendarNav
-        year={year}
-        month={month}
-        onPrev={handlePrevMonth}
-        onNext={handleNextMonth}
-      />
+    <div className="space-y-6">
       <ActivityCalendar
         year={year}
         month={month}
         activity={activity}
         onSelectDate={handleSelectDate}
         selectedDate={selectedDate}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
       />
       {selectedDate && sessions && (
         <SessionList

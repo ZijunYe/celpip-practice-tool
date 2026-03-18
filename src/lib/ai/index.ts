@@ -1,7 +1,10 @@
 import type { SpeakingScoreResult, WritingScoreResult } from "@/types/ai";
 import type { WritingTaskType } from "@/types/database";
+import type { CelpipSpeakingTest } from "@/types/speaking";
 import {
+  mockGenerateCelpipSpeakingTest,
   mockGenerateSpeakingPrompt,
+  mockGenerateSpeakingPrompts,
   mockGenerateWritingPrompt,
   mockScoreSpeaking,
   mockScoreWriting,
@@ -12,12 +15,29 @@ const hasOpenAIKey = Boolean(
   process.env.OPENAI_API_KEY?.trim()
 );
 
+/** Generate a full CELPIP Speaking test (8 tasks). Use dateKey (e.g. YYYY-MM-DD) for daily variety. */
+export async function generateCelpipSpeakingTest(
+  dateKey?: string
+): Promise<CelpipSpeakingTest> {
+  if (!hasOpenAIKey) {
+    return mockGenerateCelpipSpeakingTest(dateKey);
+  }
+  // Optional: call OpenAI with the user's CELPIP prompt to generate a new test per day
+  return mockGenerateCelpipSpeakingTest(dateKey);
+}
+
 export async function generateSpeakingPrompt(): Promise<string> {
   if (!hasOpenAIKey) {
     return mockGenerateSpeakingPrompt();
   }
-  // Optional: call OpenAI to generate a varied prompt
   return mockGenerateSpeakingPrompt();
+}
+
+export async function generateSpeakingPrompts(): Promise<string[]> {
+  if (!hasOpenAIKey) {
+    return mockGenerateSpeakingPrompts();
+  }
+  return mockGenerateSpeakingPrompts();
 }
 
 export async function generateWritingPrompt(

@@ -5,12 +5,19 @@ export interface SpeakingScoreBreakdown {
   grammar: number;
 }
 
+export interface GrammarMistake {
+  phrase: string;
+  correction: string;
+  explanation?: string;
+}
+
 export interface SpeakingScoreResult {
   score: number;
   band: number;
   breakdown: SpeakingScoreBreakdown;
   feedback: string;
   improvements: string[];
+  grammar_mistakes?: GrammarMistake[];
 }
 
 export interface WritingScoreResult {

@@ -9,13 +9,30 @@ import {
 import {
   upsertPracticeStatsForSpeaking,
 } from "@/lib/db/stats";
+import type { GrammarMistake } from "@/types/ai";
+import type { CelpipSpeakingTest } from "@/types/speaking";
 import {
+  generateCelpipSpeakingTest,
   generateSpeakingPrompt,
   transcribeAudio,
   scoreSpeaking,
 } from "@/lib/ai";
 
-export async function startSpeakingSession(): Promise<
+/** Returns a full CELPIP Speaking test (8 tasks) for the current day. Same date = same test. */
+export async function getSpeakingTest(): Promise<
+  { test: CelpipSpeakingTest } | { error: string }
+> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+  const dateKey = new Date().toISOString().slice(0, 10);
+  const test = await generateCelpipSpeakingTest(dateKey);
+  return { test };
+}
+
+export async function startSpeakingSession(questionText?: string): Promise<
   { sessionId: string; questionText: string } | { error: string }
 > {
   const supabase = await createClient();
@@ -24,7 +41,7 @@ export async function startSpeakingSession(): Promise<
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  const prompt = await generateSpeakingPrompt();
+  const prompt = questionText ?? (await generateSpeakingPrompt());
   const session = await createSpeakingSession({
     user_id: user.id,
     question_text: prompt,
@@ -66,7 +83,15 @@ export async function saveSpeakingAudio(
 export async function transcribeAndScoreSpeaking(
   sessionId: string
 ): Promise<
-  | { transcript: string; score: number; feedback: string; improvements: string[]; breakdown: { content: number; coherence: number; vocabulary: number; grammar: number }; band: number }
+  | {
+      transcript: string;
+      score: number;
+      feedback: string;
+      improvements: string[];
+      breakdown: { content: number; coherence: number; vocabulary: number; grammar: number };
+      band: number;
+      grammar_mistakes?: GrammarMistake[];
+    }
   | { error: string }
 > {
   const supabase = await createClient();
@@ -98,5 +123,6 @@ export async function transcribeAndScoreSpeaking(
     improvements: result.improvements,
     breakdown: result.breakdown,
     band: result.band,
+    grammar_mistakes: result.grammar_mistakes,
   };
 }
